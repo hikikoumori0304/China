@@ -26,21 +26,26 @@
 
 /*１枚目画像*/
 .slide1 {
-	background: url('../images/1.jpg') no-repeat center center / cover;	/*１枚目の背景画像の読み込み*/
+	background: url('../images/products/IMG_SM_004_01.jpg') no-repeat center center / cover;	/*１枚目の背景画像の読み込み*/
+	justify-content: flex-start;	/* 横方向：左寄せ */
+	align-items: flex-start;			/* 縦方向：下寄せ */
+	text-align: left;				/* テキストを左揃え */
 }
 
 /*２枚目画像*/
 .slide2 {
-	background: url('../images/2.jpg') no-repeat center center / cover;	/*２枚目の背景画像の読み込み*/
-	justify-content: flex-end;	/*テキストブロックを右側に*/
-	text-align: right;			/*テキストを右寄せ*/
+	background: url('../images/products/IMG_SZ_001_03.jpg') no-repeat center center / cover;	/*２枚目の背景画像の読み込み*/
+	justify-content: flex-start;	/* 横方向：左寄せ */
+	align-items: flex-start;			/* 縦方向：下寄せ */
+	text-align: left;				/* テキストを左揃え */
 }
 
 /*３枚目画像*/
 .slide3 {
-	background: url('../images/3.jpg') no-repeat center center / cover;	/*３枚目の背景画像の読み込み*/
-	justify-content: center;	/*テキストブロックを中央に*/
-	text-align: center;			/*テキストをセンタリング*/
+	background: url('../images/products/IMG_JK_010_01.jpg') no-repeat center center / cover;	/*３枚目の背景画像の読み込み*/
+	justify-content: flex-start;	/* 横方向：左寄せ */
+	align-items: flex-start;			/* 縦方向：下寄せ */
+	text-align: left;				/* テキストを左揃え */
 }
 
 

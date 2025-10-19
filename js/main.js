@@ -1,4 +1,69 @@
+//===============================================================
+// 共通部分の読み込み処理 2025/10/19　追加
+//===============================================================
+// ページ読み込み後に HTML を読み込んでから初期化
+window.addEventListener("DOMContentLoaded", async () => {
+  const baseLevel = detectBaseLevel();
+  const prefix = baseLevel === 1 ? "../" : "./";
 
+ // 読み込み前ログ
+  console.log("✅ 全ての共通HTMLを読み込み開始");
+
+  await includeHTML("header", prefix + "header.html");
+  await includeHTML("footer", prefix + "footer.html");
+  await includeHTML("menubar_ctrl", prefix + "menubar_ctrl.html");
+
+ // 読み込み確認ログ
+  console.log("✅ 全ての共通HTMLを読み込み完了");
+
+  // 読み込み後にパス補正を実行
+  fixRelativePaths(baseLevel);
+
+  initCommon();
+});
+
+
+//===============================================================
+// includeHTML関数
+//===============================================================
+async function includeHTML(id, file) {
+  const res = await fetch(file);
+  if (!res.ok) {
+    console.error(`❌ ${file} の読み込みに失敗しました (${res.status})`);
+    return;
+  }
+  const text = await res.text();
+  document.getElementById(id).innerHTML = text;
+}
+
+//===============================================================
+// 相対パス補正処理（重要）
+//===============================================================
+function fixRelativePaths(baseLevel) {
+  // baseLevel: 0=同階層(index.html), 1=products_detail/ など1階層下
+  const prefix = baseLevel === 1 ? "../" : "./";
+
+  // すべての a[href] と img[src] を修正
+  document.querySelectorAll(
+   `header a[href], header img[src]
+   ,footer a[href], footer img[src]
+   ,#menubar a[href], #menubar img[src]
+   `
+    ).forEach(el => {
+    const attr = el.tagName === "IMG" ? "src" : "href";
+    const val = el.getAttribute(attr);
+    // 外部URLや#アンカー、すでにhttpや../が入っている場合はスキップ
+    if (!val || val.startsWith("http") || val.startsWith("#") || val.startsWith("../")) return;
+
+    el.setAttribute(attr, prefix + val);
+  });
+}
+//===============================================================
+// 階層を自動判定する関数
+//===============================================================
+function detectBaseLevel() {
+  return location.pathname.includes("/products_detail/") ? 1 : 0;
+}
 //===============================================================
 // debounce関数
 //===============================================================
@@ -15,6 +80,12 @@ function debounce(func, wait) {
     };
 }
 
+//===============================================================
+// 全てを初期化関数化 START
+//===============================================================
+function initCommon() {
+
+
 
 //===============================================================
 // メニュー関連
@@ -27,7 +98,7 @@ var $headerNav = $('header nav');
 
 // menu
 $(window).on("load resize", debounce(function() {
-    if(window.innerWidth < 9999) {	// ここがブレイクポイント指定箇所です
+    if(window.innerWidth < 9999) {    // ここがブレイクポイント指定箇所です
         // 小さな端末用の処理
         $('body').addClass('small-screen').removeClass('large-screen');
         $menubar.addClass('display-none').removeClass('display-block');
@@ -62,14 +133,14 @@ $(function() {
     });
 
     // ドロップダウンの親liタグ（空のリンクを持つaタグのデフォルト動作を防止）
-	$menubar.find('a[href=""]').click(function() {
-		return false;
-	});
-	$headerNav.find('a[href=""]').click(function() {
-		return false;
-	});
+    $menubar.find('a[href=""]').click(function() {
+        return false;
+    });
+    $headerNav.find('a[href=""]').click(function() {
+        return false;
+    });
 
-	// ドロップダウンメニューの処理
+    // ドロップダウンメニューの処理
     $menubar.find('li:has(ul)').addClass('ddmenu_parent');
     $('.ddmenu_parent > a').addClass('ddmenu');
     $headerNav.find('li:has(ul)').addClass('ddmenu_parent');
@@ -143,6 +214,7 @@ $(function() {
 
   // クラスが動的に変更されることを想定して、MutationObserverを使用
   const observer = new MutationObserver(toggleBodyScroll);
+
   observer.observe(document.getElementById('menubar_hdr'), { attributes: true, attributeFilter: ['class'] });
 });
 
@@ -174,6 +246,7 @@ $(function() {
 
     // スクロールに応じてページトップボタンの表示/非表示を切り替え
     $(topButton).hide(); // 初期状態ではボタンを隠す
+
     $(window).scroll(function() {
         if($(this).scrollTop() >= 300) { // スクロール位置が300pxを超えたら
             $(topButton).fadeIn().addClass(scrollShow); // ボタンを表示
@@ -198,11 +271,11 @@ $(function() {
 // 汎用開閉処理
 //===============================================================
 $(function() {
-	$('.openclose').next().hide();
-	$('.openclose').click(function() {
-		$(this).next().slideToggle();
-		$('.openclose').not(this).next().slideUp();
-	});
+    $('.openclose').next().hide();
+    $('.openclose').click(function() {
+        $(this).next().slideToggle();
+        $('.openclose').not(this).next().slideUp();
+    });
 });
 
 
@@ -261,16 +334,133 @@ $(function() {
 // スライドショー
 //===============================================================
 $(function() {
-	var slides = $('#mainimg .slide');
-	var slideCount = slides.length;
-	var currentIndex = 0;
+    var slides = $('#mainimg .slide');
+    var slideCount = slides.length;
+    var currentIndex = 0;
 
-	slides.eq(currentIndex).css('opacity', 1).addClass('active');
+    slides.eq(currentIndex).css('opacity', 1).addClass('active');
 
-	setInterval(function() {
-		var nextIndex = (currentIndex + 1) % slideCount;
-		slides.eq(currentIndex).css('opacity', 0).removeClass('active');
-		slides.eq(nextIndex).css('opacity', 1).addClass('active');
-		currentIndex = nextIndex;
-	}, 4000); // 4秒ごとにスライドを切り替える
+    setInterval(function() {
+        var nextIndex = (currentIndex + 1) % slideCount;
+        slides.eq(currentIndex).css('opacity', 0).removeClass('active');
+        slides.eq(nextIndex).css('opacity', 1).addClass('active');
+        currentIndex = nextIndex;
+    }, 4000); // 4秒ごとにスライドを切り替える
 });
+
+}
+//===============================================================
+// 全てを初期化関数化 END
+//===============================================================
+
+//===============================================================
+// 随時処理 START
+//===============================================================
+//===============================================================
+// メニュー関連
+//===============================================================
+
+// 変数でセレクタを管理
+var $menubar = $('#menubar');
+var $menubarHdr = $('#menubar_hdr');
+var $headerNav = $('header nav');
+
+// menu
+$(window).on("load resize", debounce(function() {
+    if(window.innerWidth < 9999) {    // ここがブレイクポイント指定箇所です
+        // 小さな端末用の処理
+        $('body').addClass('small-screen').removeClass('large-screen');
+        $menubar.addClass('display-none').removeClass('display-block');
+        $menubarHdr.removeClass('display-none ham').addClass('display-block');
+    } else {
+        // 大きな端末用の処理
+        $('body').addClass('large-screen').removeClass('small-screen');
+        $menubar.addClass('display-block').removeClass('display-none');
+        $menubarHdr.removeClass('display-block').addClass('display-none');
+
+        // ドロップダウンメニューが開いていれば、それを閉じる
+        $('.ddmenu_parent > ul').hide();
+    }
+}, 10));
+
+//===============================================================
+// 小さなメニューが開いている際のみ、body要素のスクロールを禁止。
+//===============================================================
+$(function() {
+  function toggleBodyScroll() {
+    // 条件をチェック
+    if ($('#menubar_hdr').hasClass('ham') && !$('#menubar_hdr').hasClass('display-none')) {
+      // #menubar_hdr が 'ham' クラスを持ち、かつ 'display-none' クラスを持たない場合、スクロールを禁止
+      $('body').css({
+        overflow: 'hidden',
+        height: '100%'
+      });
+    } else {
+      // その他の場合、スクロールを再び可能に
+      $('body').css({
+        overflow: '',
+        height: ''
+      });
+    }
+  }
+
+  // 初期ロード時にチェックを実行
+  toggleBodyScroll();
+
+  // クラスが動的に変更されることを想定して、MutationObserverを使用
+  const observer = new MutationObserver(toggleBodyScroll);
+  if(document.getElementById('menubar_hdr')){
+    observer.observe(document.getElementById('menubar_hdr'), { attributes: true, attributeFilter: ['class'] });
+  }
+});
+
+//===============================================================
+// スムーススクロール（※バージョン2024-1）※通常タイプ
+//===============================================================
+$(function() {
+    // ページ上部へ戻るボタンのセレクター
+    var topButton = $('.pagetop');
+    // ページトップボタン表示用のクラス名
+    var scrollShow = 'pagetop-show';
+
+    // スムーススクロールを実行する関数
+    // targetにはスクロール先の要素のセレクターまたは'#'（ページトップ）を指定
+    function smoothScroll(target) {
+        // スクロール先の位置を計算（ページトップの場合は0、それ以外は要素の位置）
+        var scrollTo = target === '#' ? 0 : $(target).offset().top;
+        // アニメーションでスムーススクロールを実行
+        $('html, body').animate({scrollTop: scrollTo}, 500);
+    }
+
+    // ページ内リンクとページトップへ戻るボタンにクリックイベントを設定
+    $('a[href^="#"], .pagetop').click(function(e) {
+        e.preventDefault(); // デフォルトのアンカー動作をキャンセル
+        var id = $(this).attr('href') || '#'; // クリックされた要素のhref属性を取得、なければ'#'
+        smoothScroll(id); // スムーススクロールを実行
+    });
+
+    // スクロールに応じてページトップボタンの表示/非表示を切り替え
+    $(topButton).hide(); // 初期状態ではボタンを隠す
+
+    $(window).scroll(function() {
+        if($(this).scrollTop() >= 300) { // スクロール位置が300pxを超えたら
+            $(topButton).fadeIn().addClass(scrollShow); // ボタンを表示
+        } else {
+            $(topButton).fadeOut().removeClass(scrollShow); // それ以外では非表示
+        }
+    });
+
+    // ページロード時にURLのハッシュが存在する場合の処理
+    if(window.location.hash) {
+        // ページの最上部に即時スクロールする
+        $('html, body').scrollTop(0);
+        // 少し遅延させてからスムーススクロールを実行
+        setTimeout(function() {
+            smoothScroll(window.location.hash);
+        }, 10);
+    }
+});
+
+//===============================================================
+// 随時処理 END
+//===============================================================
